@@ -5,24 +5,26 @@ const port = 3000
 
 require('dotenv').config()
 
-const mongoose = require("mongoose")
 const bodyParser = require('body-parser')
 
-mongoose.connect(process.env.MONGO_URI).then(()=> console.log("Connected")).catch((error) => console.log("Error"))
+const userController = require('./users/users.controller')
+const passport = require('passport')
 
-
+app.use(express.json())
+app.use(bodyParser.json())
+app.use(passport.initialize())
 
 app.use(locationController)
+app.use(userController)
+
+
+app.get('/', (req, res) => {
+	return res.status(200).send({
+		message:"Hello, don't forget to provide a bearer token to access to locations",
+		startpoints: ["/users","/locations"]
+	})
+})
 
 app.listen(port, () => {
 	console.log(`API listening on port ${port}, visit http://localhost:${port}/`)
 })
-
-app.use(bodyParser.json())
-app.use('/locations', locationController)
-
-app.get('/', (req, res) => {
-	res.send('Hello World');
-  });
-
-mongoose.connection.close();

@@ -3,29 +3,57 @@
 
 const router = require('express').Router()
 const locationsService = require('./locations.service')
+const passport = require("passport");
+const localStrategy = require('../auth/local-strategy')
+const jwtStrategy = require('../auth/jwt-strategy')
 
+router.use('/locations', (passport.authenticate('jwt', {session: false})));
+router.route('/locations/:id')
+	.get(async (req, resp) => {
+		const loc = await locationsService.locationId(req.params.id)
+		if (loc) {
+			return resp.status(200).send({location: loc})
+		}
+		else
+			return resp.status(404).send({err: "Location not found"})
+	})
+	.delete(async (req, resp) => {
+		const loc = await locationsService.deleteLocationFromId(req.params.id)
+		if (loc) {
+			return resp.status(200).send({location: loc})
+		}
+		else
+			return resp.status(404).send({err: "Failed to delete"})
+	})
+	.put(async (req, resp) => {
+		const loc = await locationsService.updateLocation(req.params.id, req.body)
+		if (loc) {
+			return resp.status(200).send({location: loc})
+		}
+		else
+			return resp.status(404).send({err: "Failed to update"})
+	})
+router.route('/locations')
+	.get(async (req, resp) => {
+		const locs = await locationsService.findAll()
+		if (locs) {
+			return resp.status(200).send({locations: locs})
+		}
+		else
+			return resp.status(404).send({err: "An error has occurred"})
+	})
+	.post(async (req, resp) => {
+		const loc = await locationsService.addLocation(req.body)
+		if (loc) {
+			return resp.status(200).send({location: loc})
+		}
+		else
+			return resp.status(404).send({err: "An error has occurred"})
+	})
+router.get('/test',(request,response) => {
+	return response.status(200).send("Hello World");
+});
 
-router.get('/locations', async (req, res) => {
-	return res.status(200).send({locations: await locationsService.findAll()})
-})
-
-router.get('/locations/:id', async (req, res) => {
-	return res.status(200).send({location: await locationsService.findOne(req.params.id)})
-})
-
-router.delete('/locations/:id', async (req, res) => {
-	return res.status(200).send({params: await locationsService.eraseOne(req.params.id)})
-})
-
-router.post('/locations/', async (req, res) => {
-	console.log(req.body)
-	return res.status(200).send({location: await locationsService.Create(req.body)})
-})
-
-router.patch('/locations/', async (req, res) => {
-	console.log(req.body)
-	return res.status(200).send({location: await locationsService.Patch(req.body)})
-})
 
 
 

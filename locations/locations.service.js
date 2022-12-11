@@ -1,34 +1,56 @@
 // This file holds the Business-Logic layer, interacting with Data Layer
-
 const Location = require('./locations.model')
 
-function findAll () {
-	return Location.find({}).limit(10).lean()
+async function findAll () {
+	try {
+		const response = await Location.find();
+		return response;
+	} catch (err) {
+		console.log(err);
+		return null
+	}
+}
+
+async function locationId(id) {
+	try {
+		const response = await Location.findOne({_id:id});
+		return response;
+	} catch (err) {
+		console.log(err);
+		return null
+	}
+}
+
+async function deleteLocationFromId(id) {
+	try {
+		return await Location.findOneAndDelete({_id:id});
+	} catch (err) {
+		console.log(err);
+		return null
+	}
+}
+
+async function addLocation(location) {
+	try {
+		return await Location.create(location);
+	} catch (err) {
+		console.log(err);
+		return null
+	}
 
 }
 
-function findOne (id){
-	return Location.findById(id)
-}
-
-async function Create(body){
-	const location = new Location(body)
-	await location.save()
-	return location
-}
-
-async function eraseOne(id){
-	await Location.deleteOne({_id : id})
-	return "erased !"
-}
-
-async function Patch(body){
-	await Location.findByIdAndUpdate({_id : body}, body)
-	return findOne(body._id)
+async function updateLocation(id, newProperty){
+	try {
+		return Location.findOneAndUpdate({_id:id}, newProperty);
+	} catch (err) {
+		console.log(err);
+		return null
+	}
 }
 
 module.exports.findAll = findAll
-module.exports.findOne = findOne
-module.exports.eraseOne = eraseOne
-module.exports.Create = Create
-module.exports.Patch = Patch
+module.exports.locationId = locationId
+module.exports.addLocation = addLocation
+module.exports.deleteLocationFromId = deleteLocationFromId
+module.exports.updateLocation = updateLocation
