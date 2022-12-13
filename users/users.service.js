@@ -1,6 +1,6 @@
 const User = require('./users.model');
+const usersLocal = require('../auth/local-strategy');
 const Location = require("../locations/locations.model");
-const usersLocal = require('../auth/local-strategy')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const saltRounds = 10;
@@ -23,15 +23,7 @@ async function userMe(id) {
         return "User doesn't exist";
     }
 }
-async function deleteUserMe(id) {
-    try {
-        const resp = await User.findOneAndDelete({_id: id}).select('-password');
-        return resp;
-    } catch (err) {
-        console.log(err);
-        return null;
-    }
-}
+
 async function register(user) {
     try {
         const hashedPass = await bcrypt.hash(user.password, saltRounds)
@@ -42,14 +34,14 @@ async function register(user) {
         return null;
     }
 }
-async function updateUserMe(id, newProperty){
-    try {
-        const resp = await User.findOneAndUpdate({_id: id}, newProperty).select('-password');
-        return resp;
 
+async function deleteUserMe(id) {
+    try {
+        const resp = await User.findOneAndDelete({_id: id}).select('-password');
+        return resp;
     } catch (err) {
         console.log(err);
-        return null
+        return null;
     }
 }
 
@@ -61,11 +53,24 @@ async function generateJwt(user){
     }
 }
 
+async function updateUserMe(id, newProperty){
+    try {
+        const resp = await User.findOneAndUpdate({_id: id}, newProperty).select('-password');
+        return resp;
+
+    } catch (err) {
+        console.log(err);
+        return null
+    }
+}
+
+
+
 module.exports = {
     findAll,
     userMe,
     register,
     deleteUserMe,
-    updateUserMe,
-    generateJwt
+    generateJwt,
+    updateUserMe
 }

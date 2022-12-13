@@ -1,5 +1,5 @@
 // This file holds the Business-Logic layer, interacting with Data Layer
-const Location = require('./locations.model')
+const Location = require('./locations.model');
 
 async function findAll () {
 	try {
@@ -21,15 +21,6 @@ async function locationId(id) {
 	}
 }
 
-async function deleteLocationFromId(id) {
-	try {
-		return await Location.findOneAndDelete({_id:id});
-	} catch (err) {
-		console.log(err);
-		return null
-	}
-}
-
 async function addLocation(location) {
 	try {
 		return await Location.create(location);
@@ -37,7 +28,15 @@ async function addLocation(location) {
 		console.log(err);
 		return null
 	}
+}
 
+async function deleteLocationFromId(id) {
+	try {
+		return await Location.findOneAndDelete({_id:id});
+	} catch (err) {
+		console.log(err);
+		return null
+	}
 }
 
 async function updateLocation(id, newProperty){

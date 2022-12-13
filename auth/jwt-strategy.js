@@ -1,10 +1,10 @@
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 const passport = require("passport");
 const stream = require("stream");
-const {Strategy} = require("passport-jwt");
 const usersService = require("../users/users.service");
-const JWTstrategy = require('passport-jwt').Strategy;
 const ExtractJWT = require('passport-jwt').ExtractJwt;
+const {Strategy} = require("passport-jwt");
+const JWTstrategy = require('passport-jwt').Strategy;
 
 passport.use( new Strategy({
         secretOrKey: process.env.JWTSECRET,

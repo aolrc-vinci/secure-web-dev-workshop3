@@ -1,6 +1,6 @@
-const router = require('express').Router()
-const usersService = require('./users.service')
 const passport = require('passport');
+const router = require('express').Router()
+const usersService = require('./users.service');
 require('../auth/local-strategy');
 require('../auth/jwt-strategy');
 

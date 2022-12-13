@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 require('dotenv').config();
-console.log(process.env.MONGO_URI)
+console.log(process.env.MONGO_URI);
 mongoose.connect(process.env.MONGO_ROOT_URI);
 
 const filmSchema = new mongoose.Schema({
