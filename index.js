@@ -20,7 +20,7 @@ app.use(userController)
 
 app.get('/', (req, res) => {
 	return res.status(200).send({
-		message:"Hello, don't forget to provide a bearer token to access to locations",
+		message:"Hello. Please don't forget to provide a bearer token to access the locations",
 		startpoints: ["/users","/locations"]
 	})
 })
