@@ -1,24 +1,26 @@
 const { Strategy } = require('passport-local');
 const User = require("../users/users.model");
-const bcrypt = require("bcrypt");
 const passport = require("passport");
+const usersService = require('../users/users.service');
 
 passport.use(new Strategy(async function (username, password, done) {
     try {
-        const user = await User.findOne({username:username});
-        const bool = await bcrypt.compare(password, User.password);
-        if (!user) {
-            return done(null,false)
+        const user = await User.findOne(username)
+            if (!user)  {
+                console.log("User not found");
+                return done(null, false);
+            }
+            if (!await usersService.verify(username, password)){
+                console.log("Wrong password");
+                return done(null, false);
+            }
+            return done(null, user);
         }
-        else if (!bool) {
-            return done(null,false)
+        catch(err) {
+            if (err)    return done(err)
         }
-        return done(null,user)
-    } catch (err) {
-        console.log(err);
-        return done(err,false)
     }
-}));
+));
 
 
 module.exports = passport

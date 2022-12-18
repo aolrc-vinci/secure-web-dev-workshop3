@@ -2,54 +2,73 @@
 const Location = require('./locations.model');
 
 async function findAll () {
+	return Location.find();
+}
+async function findOne({_id}) {
 	try {
-		const response = await Location.find();
-		return response;
+		return Location.findOne({_id}, null);
 	} catch (err) {
-		console.log(err);
-		return null
+		console.log("Something has occured while trying to retrieve the location");
+		console.error(err);
+		return null;
 	}
 }
 
-async function locationId(id) {
+async function createOne(location) {
 	try {
-		const response = await Location.findOne({_id:id});
-		return response;
+		if (location === undefined) throw new Error("Undefined location");
+
+		const { filmType, filmProducerName, endDate, filmName, district, geolocation, sourceLocationId, filmDirectorname, address, startDate, year } = location;
+		await Location.create({ filmType,
+			filmProducerName,
+			endDate,
+			filmName,
+			district,
+			geolocation,
+			sourceLocationId,
+			filmDirectorname,
+			address,
+			startDate,
+			year
+		});
+		console.log("Location added");
+		return true;
+
 	} catch (err) {
-		console.log(err);
-		return null
+		console.log("Error during the creation of the location");
+		console.error(err);
+		return false;
 	}
 }
 
-async function addLocation(location) {
+async function deleteOne(id){
 	try {
-		return await Location.create(location);
-	} catch (err) {
-		console.log(err);
-		return null
+		const {_id} = id;
+		await Location.findOneAndDelete({_id}).orFail();
+		console.log(`Deleted ${_id}`);
+		return true;
+	} catch (e) {
+		console.log("Error during the suppression of the location");
+		console.error(err);
+		return false;
 	}
 }
 
-async function deleteLocationFromId(id) {
+async function updateOne(id, property){
 	try {
-		return await Location.findOneAndDelete({_id:id});
-	} catch (err) {
-		console.log(err);
-		return null
-	}
-}
-
-async function updateLocation(id, newProperty){
-	try {
-		return Location.findOneAndUpdate({_id:id}, newProperty);
-	} catch (err) {
-		console.log(err);
-		return null
+		const {_id} = id;
+		await Location.findOneAndUpdate({_id}, property).orFail();
+		console.log(`Updated ${_id}`);
+		return true;
+	} catch (e) {
+		console.log("Error during the update of the location");
+		console.error(err);
+		return false;
 	}
 }
 
 module.exports.findAll = findAll
-module.exports.locationId = locationId
-module.exports.addLocation = addLocation
-module.exports.deleteLocationFromId = deleteLocationFromId
-module.exports.updateLocation = updateLocation
+module.exports.findOne = findOne
+module.exports.createOne = createOne
+module.exports.deleteOne = deleteOne
+module.exports.updateOne = updateOne

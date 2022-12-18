@@ -9,7 +9,11 @@ const userSchema = new mongoose.Schema({
         unique: true,        // username must be unique
     },
     password: {
+        type: String
+    },
+    role : {
         type: String,
+        immutable : true    //User cannot change their role
     }
 });
 

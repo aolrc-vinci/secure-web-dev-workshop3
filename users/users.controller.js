@@ -3,52 +3,73 @@ const router = require('express').Router()
 const usersService = require('./users.service');
 require('../auth/local-strategy');
 require('../auth/jwt-strategy');
+const middleware = require("../jwtMiddleware/middleware");
 
-router.post('/users/register', async (req, resp) => {
-    const user = await usersService.register(req.body);
-    if (user == null)
-        return resp.status(404).send({err: "User already exists"});
-    else
-        return resp.status(200).send({user: user.username});
-})
-router.use('/users/login', passport.authenticate('local', {session: false}));
-router.post( '/users/login',async (req, resp) => {
-    if (req.user) {
-        return resp.status(200).send({mess: "Connected", username: req.body.username, jwt: await usersService.generateJwt(req.user)});
+// Register route
+
+router.post('/register',
+    async (req, res) => {
+    console.log(req.body);
+    try {
+        if (req.body?.username && req.body?.password)
+        {
+            const {username, password} = req.body;
+            const user = await usersService.register(username, password);
+            if (user) {
+                return res.status(200).send(user);
+            }
+            else {
+                return res.status(400).send("An error has occurred. Please try changing your username or password.");
+            }
+        }
     }
-    else
-        return resp.status(403).send({err: "Incorrect username or password."});
-})
+    catch(error) {
+    next(error); }
+});
 
-router.use('/users/me', (passport.authenticate('jwt', {session: false})));
-router.route('/users/me')
-    .get(async (req, resp) => {
-        if (req.user) {
-            return resp.status(200).send({mess: "You are registered as", user: req.user});
-        }
-        else
-            return resp.status(403).send({err: "Unauthorized"});
-    })
-    .delete(async (req, resp) => {
-        const user = await usersService.deleteUserMe(req.user._id);
-        console.log(user);
-        if (user) {
-            return resp.status(200).send({mess: "User deleted", user: user});
-        }
-        else
-            return resp.status(403).send({err: "Unauthorized"});
-    })
-    .put(async (req, resp) => {
-        const user = await usersService.updateUserMe(req.user._id, req.body);
-        if (user) {
-            return resp.status(200).send({mess: "User updated", user: user});
-        }
-        else
-            return resp.status(403).send({err: "Unauthorized"});
-    })
-router.get('/users', async (req, resp) => {
-    return resp.status(200).send({users: (await usersService.findAll())})
-})
+
+// Login route
+
+router.post('/login',
+    passport.authenticate('local',
+        {session: false}),
+        async (req, res) => {
+        const id = req.user?._id;
+        const token = await usersService.generateJWT(id);
+        return res.status(200).send({token});
+});
+
+//JWT middleware
+
+router.use('/me',passport.authenticate('jwt', {session:false, failureRedirect:'/login'}));
+
+
+// Get self
+
+router.get('/me', middleware.canAccess(['admin','user']),async (req, res) => {
+    const user = await usersService.getUser(req.user._id)
+    return res.status(200).send(user);
+});
+
+router.patch('/me', middleware.canAccess(['admin','user']),
+    async (req, res) => {
+        const updatedUser = await usersService.update(req,res);
+        return res.status(200).send(updatedUser);
+});
+
+router.delete('/me', middleware.canAccess(['admin']),
+    async (req, res) => {
+        return res.status(200).send(await(usersService.deleteUser(req.user._id)));
+});
+
+
+// Get all users : remember to not return users passwords on this route
+
+router.get('/', middleware.canAccess(['admin','user']),
+    async (req, res) => {
+    const allUser = await(usersService.findAll())
+    return res.status(200).send(allUser);
+});
 
 
 module.exports = router
